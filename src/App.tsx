@@ -1,7 +1,16 @@
+import { BrowserRouter, Routes, Route } from "react-router";
+import { HomePage, LevenshteinPage } from "./pages";
+
 function App() {
   return (
     <>
-      This is the home page.
+      <BrowserRouter>
+        <div>[NAV_BAR]</div>
+        <Routes>
+          <Route path='/' element={<HomePage />} />
+          <Route path='/levenshtein' element={<LevenshteinPage />} />
+        </Routes>
+      </BrowserRouter>
     </>
   )
 }
