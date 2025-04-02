@@ -14,7 +14,7 @@ function App() {
             </Typography.Title>
             <SideMenu />
           </Layout.Sider>
-          <Layout className="p-8">
+          <Layout className="px-12 py-8">
             <Routes>
               <Route path='/' element={<HomePage />} />
               <Route path='/levenshtein' element={<LevenshteinPage />} />
