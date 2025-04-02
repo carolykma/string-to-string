@@ -1,5 +1,5 @@
 export const LevenshteinPage = () => {
-    return <>
+    return <div id='levenshtein-page'>
         This is the Levenshtein Page
-    </>
+    </div>
 }
