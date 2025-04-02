@@ -1,6 +1,9 @@
 import { Menu } from 'antd'
+import { useNavigate } from 'react-router'
 
 export const SideMenu = () => {
+    const navigate = useNavigate();
+
     return <Menu
         id="side-menu"
         mode="inline"
@@ -9,7 +12,10 @@ export const SideMenu = () => {
         items={[
             {
                 key: 'home',
-                label: "Home"
+                label: "Home",
+                onClick: () => {
+                    navigate('/')
+                }
             },
             {
                 key: 'similarity',
@@ -17,7 +23,10 @@ export const SideMenu = () => {
                 children: [
                     {
                         key: 'levenshtein',
-                        label: 'Levenshtein'
+                        label: 'Levenshtein',
+                        onClick: () => {
+                            navigate('/levenshtein')
+                        }
                     }
                 ]
             }
