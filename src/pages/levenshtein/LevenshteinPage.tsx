@@ -1,8 +1,8 @@
 import { Typography } from "antd"
 import { LevenshteinMatrix } from "./LevenshteinMatrix"
 
-const strA = "BELGIUM"
-const strB = "BULGARIA"
+const strA = "SUNDAY"
+const strB = "SATURDAY"
 
 export const LevenshteinPage = () => {
     return <div id='levenshtein-page'>
