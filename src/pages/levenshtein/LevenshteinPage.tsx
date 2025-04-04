@@ -15,15 +15,15 @@ export const LevenshteinPage = () => {
         String A: {strA}<br />
         String B: {strB}<br /><br />
 
-        <Flex>
-            {
-                ["", ...strA.split("")].map(char => <Grid text={char} />)
-            }
-        </Flex>
-        <Flex vertical>
+        <Flex vertical gap={1} className="bg-gray-200 w-fit rounded-md overflow-hidden">
+            <Flex gap={1}>
+                {
+                    ["", ...strA.split("")].map(char => <Grid text={char} />)
+                }
+            </Flex>
             {
                 strB.split("").map(char => {
-                    return <Flex>
+                    return <Flex gap={1}>
                         <Grid text={char} />
                         {Array(strA.length).fill(<Grid />)}
                     </Flex>
@@ -44,9 +44,9 @@ const Grid = (props: GridProps) => {
             style={{
                 width: gridSize,
                 height: gridSize,
-                border: "1px solid grey",
-                cursor: "pointer"
-            }}>
+            }}
+            className="cursor-pointer bg-white hover:bg-blue-100"
+        >
             {text || " "}
         </Flex>
     )
