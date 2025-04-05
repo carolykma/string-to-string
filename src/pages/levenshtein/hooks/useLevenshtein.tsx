@@ -31,21 +31,26 @@ export const useLevenshtein = (props: { a: string, b: string }) => {
     const computeNextLevel = () => {
         if (!hasNextLevel) return
 
+        // clone matrix (to avoid too many state updates)
         const newMatrix = _.cloneDeep(matrix)
 
-        // calculate one column to the right
-        if (level < a.length) {
-            for (let y = 0; y < Math.min(level, b.length); y++) {
-                newMatrix[y].push(computeGridValue(a, b, level, y, newMatrix))
-            }
-        }
-        // calculate one row to the bottom
-        if (level < b.length) {
-            newMatrix.push([])
-            for (let x = 0; x <= Math.min(level, a.length - 1); x++) {
-                newMatrix[level].push(computeGridValue(a, b, x, level, newMatrix))
-            }
-        }
+        /*
+            New level will add:             x x         x x n
+            - 1 column to the right         x x    ->   x x n
+            - 1 row to the bottom                       n n n
+        */
+        const coordinates: { x: number, y: number }[] = []
+        for (let y = 0; y < level; y++) coordinates.push({ x: level, y })
+        for (let x = 0; x <= level; x++) coordinates.push({ x, y: level })
+
+        // calculate new value for each grid
+        coordinates.forEach(({ x, y }) => {
+            if (x >= a.length || y >= b.length) return
+            if (!newMatrix[y]) newMatrix[y] = []
+            newMatrix[y][x] = computeGridValue(a, b, x, y, newMatrix)
+        })
+
+        // update state
         setMatrix(newMatrix)
     }
 
