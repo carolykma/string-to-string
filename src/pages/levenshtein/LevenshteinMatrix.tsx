@@ -24,24 +24,29 @@ const getGridValue = (
 type LevenshteinMatrixProps = {
     a: string
     b: string
+    compute?: boolean
 }
 
 export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
-    const { a, b } = props
+    const { a, b, compute } = props
     const [matrix, setMatrix] = useState<number[][]>([])
 
     // number of levels that have been computed
-    const level = useMemo(() => matrix.length, [matrix])
+    // const level = useMemo(() => matrix[0]?.length, [matrix])
+    const level = useMemo(() => Math.max(matrix.length, matrix[0]?.length || 0), [matrix])
 
     useEffect(() => {
+        if (!compute) return
         if (level >= a.length && level >= b.length) return
 
         const newMatrix = _.cloneDeep(matrix)
+        // calculate column of layer from top
         if (level < a.length) {
-            for (let y = 0; y < level; y++) {
+            for (let y = 0; y < Math.min(level, b.length); y++) {
                 newMatrix[y].push(getGridValue(a, b, level, y, newMatrix))
             }
         }
+        // calculate bottom row
         if (level < b.length) {
             newMatrix.push([])
             for (let x = 0; x <= Math.min(level, a.length - 1); x++) {
@@ -49,7 +54,11 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
             }
         }
         setMatrix(newMatrix)
-    }, [matrix])
+    }, [matrix, compute])
+
+    useEffect(() => {
+        setMatrix([])
+    }, [a, b])
 
     return (
         <Flex vertical gap={1} className="bg-gray-200 w-fit rounded-md overflow-hidden">
