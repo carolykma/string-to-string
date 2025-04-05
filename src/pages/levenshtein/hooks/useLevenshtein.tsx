@@ -54,6 +54,17 @@ export const useLevenshtein = (props: { a: string, b: string }) => {
         setMatrix(newMatrix)
     }
 
+    const getPrevMinCoordinates = (x: number, y: number) => {
+        if (matrix[y]?.[x] === undefined) return [];
+        const allPrev = [
+            { x: x - 1, y },
+            { x, y: y - 1 },
+            { x: x - 1, y: y - 1 },
+        ].filter(({ x, y }) => matrix[y]?.[x] !== undefined)
+        const min = _.min(allPrev.map(({ x, y }) => matrix[y][x]))
+        return allPrev.filter(({ x, y }) => matrix[y][x] === min)
+    }
+
     useEffect(() => {
         setMatrix([])
     }, [a, b])
@@ -63,5 +74,6 @@ export const useLevenshtein = (props: { a: string, b: string }) => {
         level,
         hasNextLevel,
         computeNextLevel,
+        getPrevMinCoordinates,
     }
 }
