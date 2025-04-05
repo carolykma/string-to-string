@@ -30,9 +30,9 @@ type LevenshteinMatrixProps = {
 export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
     const { a, b, compute } = props
     const [matrix, setMatrix] = useState<number[][]>([])
+    const [hovered, setHovered] = useState<{ x: number, y: number }>()
 
     // number of levels that have been computed
-    // const level = useMemo(() => matrix[0]?.length, [matrix])
     const level = useMemo(() => Math.max(matrix.length, matrix[0]?.length || 0), [matrix])
 
     useEffect(() => {
@@ -61,21 +61,39 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
     }, [a, b])
 
     return (
-        <Flex vertical gap={1} className="bg-gray-200 w-fit rounded-md overflow-hidden">
+        <Flex vertical gap={1}
+            className="bg-gray-200 w-fit rounded-md overflow-hidden"
+            onMouseLeave={() => setHovered(undefined)}
+        >
             <Flex gap={1}>
                 <InteractiveGrid disabled={true} />
+
+                {/* strA characters */}
                 {a.split("").map((char, idx) =>
-                    <InteractiveGrid text={char} key={`a-${idx}`} />
+                    <InteractiveGrid
+                        text={char}
+                        active={hovered && hovered.x >= idx}
+                        key={`a-${idx}`}
+                    />
                 )}
             </Flex>
             {
                 b.split("").map((char, idx) => {
                     return <Flex gap={1} key={`b-row-${idx}`}>
-                        <InteractiveGrid text={char} key={`b-${idx}`} />
+                        {/* strB characters */}
+                        <InteractiveGrid
+                            text={char}
+                            active={hovered && hovered.y >= idx}
+                            key={`b-${idx}`}
+                        />
 
                         {/* computed values */}
                         {matrix[idx]?.map((value, idx2) =>
-                            <InteractiveGrid text={value.toString()} key={`value-${idx}-${idx2}`} />
+                            <InteractiveGrid
+                                text={value.toString()}
+                                setHovered={() => setHovered({ x: idx2, y: idx })}
+                                key={`value-${idx2}-${idx}`}
+                            />
                         )}
                     </Flex>
                 })
