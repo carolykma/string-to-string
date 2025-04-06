@@ -1,14 +1,20 @@
 import _ from "lodash"
 import { useEffect, useMemo, useState } from "react"
 
+// types
+export type Coordinates = {
+    x: number
+    y: number
+}
+
 // algorithm
 const computeGridValue = (
     a: string,
     b: string,
-    x: number,
-    y: number,
+    coordinates: Coordinates,
     currentMatrix: number[][]
 ) => {
+    const { x, y } = coordinates;
     if (x === 0 && y === 0) return a[0] === b[0] ? 0 : 1 // initial
 
     const candidates = []
@@ -47,22 +53,50 @@ export const useLevenshtein = (props: { a: string, b: string }) => {
         coordinates.forEach(({ x, y }) => {
             if (x >= a.length || y >= b.length) return
             if (!newMatrix[y]) newMatrix[y] = []
-            newMatrix[y][x] = computeGridValue(a, b, x, y, newMatrix)
+            newMatrix[y][x] = computeGridValue(a, b, { x, y }, newMatrix)
         })
 
         // update state
         setMatrix(newMatrix)
     }
 
-    const getPrevMinCoordinates = (x: number, y: number) => {
-        if (matrix[y]?.[x] === undefined) return [];
+    const hasValue = (coordinates: Coordinates): boolean => {
+        const { x, y } = coordinates
+        return matrix[y]?.[x] !== undefined
+    }
+
+    const getPrevSteps = (coordinates: Coordinates): Coordinates[] => {
+        if (!hasValue(coordinates)) return [];
+        const { x, y } = coordinates;
         const allPrev = [
             { x: x - 1, y },
             { x, y: y - 1 },
             { x: x - 1, y: y - 1 },
-        ].filter(({ x, y }) => matrix[y]?.[x] !== undefined)
+        ].filter(hasValue)
         const min = _.min(allPrev.map(({ x, y }) => matrix[y][x]))
         return allPrev.filter(({ x, y }) => matrix[y][x] === min)
+    }
+
+    const getAllPrevSteps = (coordinates: Coordinates): Coordinates[] => {
+        if (!hasValue(coordinates)) return [];
+
+        const set = new Set<string>() // key: "x-y" for deduplication
+        set.add('0-0'); // recursive call will stop when reaching 0-0
+        const getPrevStepsRecursively = (coordinates: Coordinates) => {
+            getPrevSteps(coordinates).forEach((grid) => {
+                const key = `${grid.x}-${grid.y}`
+                if (!set.has(key)) {
+                    set.add(key)
+                    getPrevStepsRecursively(grid)
+                }
+            })
+        }
+
+        getPrevStepsRecursively(coordinates)
+        return Array.from(set).map(key => {
+            const [x, y] = key.split('-')
+            return { x: parseInt(x), y: parseInt(y) }
+        })
     }
 
     useEffect(() => {
@@ -74,6 +108,7 @@ export const useLevenshtein = (props: { a: string, b: string }) => {
         level,
         hasNextLevel,
         computeNextLevel,
-        getPrevMinCoordinates,
+        getPrevSteps,
+        getAllPrevSteps,
     }
 }

@@ -2,7 +2,7 @@ import _ from "lodash"
 import { Flex } from "antd"
 import { InteractiveGrid } from "../../components/grid"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { useLevenshtein } from "./hooks/useLevenshtein"
+import { Coordinates, useLevenshtein } from "./hooks/useLevenshtein"
 
 type LevenshteinMatrixProps = {
     a: string
@@ -12,15 +12,15 @@ type LevenshteinMatrixProps = {
 
 export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
     const { a, b, compute } = props
-    const { matrix, hasNextLevel, computeNextLevel, getPrevMinCoordinates } = useLevenshtein({ a, b })
+    const { matrix, hasNextLevel, computeNextLevel, getAllPrevSteps } = useLevenshtein({ a, b })
 
-    const [hovered, setHovered] = useState<{ x: number, y: number }>()
+    const [hovered, setHovered] = useState<Coordinates>()
 
     // for displaying min route
-    const prevMinCoordinates = useMemo(() => hovered ? getPrevMinCoordinates(hovered?.x, hovered?.y) : [], [hovered])
-    const isPrevMin = useCallback(
-        (_x: number, _y: number) => prevMinCoordinates.some(({ x, y }) => x === _x && y === _y),
-        [prevMinCoordinates]
+    const prevSteps = useMemo(() => hovered ? getAllPrevSteps(hovered) : [], [hovered])
+    const isPrevStep = useCallback(
+        (coordinates: Coordinates) => prevSteps.some((prevStep) => _.isEqual(coordinates, prevStep)),
+        [prevSteps]
     )
 
 
@@ -60,7 +60,7 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
                             <InteractiveGrid
                                 text={value.toString()}
                                 setHovered={() => setHovered({ x: idx2, y: idx })}
-                                positive={isPrevMin(idx2, idx)}
+                                positive={isPrevStep({ x: idx2, y: idx })}
                                 key={`value-${idx2}-${idx}`}
                             />
                         )}
