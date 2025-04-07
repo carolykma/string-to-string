@@ -7,9 +7,17 @@ export type Coordinates = {
     y: number
 }
 
+export enum EditTypeEnum {
+    INSERTION = 'insertion',
+    DELETION = 'deletion',
+    SUBSTITUTION = 'substitution',
+    NULL = 'null'
+}
+
 export type Edit = {
-    description: string,
-    from: 'top-left' | 'top' | 'left'
+    from: Coordinates,
+    to: Coordinates,
+    type: EditTypeEnum
 }
 
 // algorithm
@@ -139,26 +147,27 @@ export const useLevenshtein = (props: { a: string, b: string }) => {
         return path;
     }
 
-    const getEditFromPrevStep = (cur: Coordinates, prev: Coordinates): Edit => {
-        const { x, y } = cur
-        if (_.isEqual(prev, { x: x - 1, y: y - 1 })) {
-            return {
-                from: 'top-left',
-                description: a[x] === b[y] ? "no edit" : `${a[x]} → ${b[y]}`,
-            }
-        } else if (_.isEqual(prev, { x, y: y - 1 })) {
-            return {
-                from: 'top',
-                description: `+ ${b[y]}`,
-            }
-        } else if (_.isEqual(prev, { x: x - 1, y })) {
-            return {
-                from: 'left',
-                description: `- ${a[x]}`
-            }
+    const getEdit = (to: Coordinates, from: Coordinates): Edit => {
+        const { x, y } = to
+        let type: EditTypeEnum
+        if (_.isEqual(from, { x: x - 1, y: y - 1 })) {
+            type = getValue(to) === getValue(from) ? EditTypeEnum.NULL : EditTypeEnum.SUBSTITUTION
+        } else if (_.isEqual(from, { x, y: y - 1 })) {
+            type = EditTypeEnum.INSERTION
+        } else if (_.isEqual(from, { x: x - 1, y })) {
+            type = EditTypeEnum.DELETION
         } else {
-            throw new Error('invalid coordinates for getEditFromPrevStep')
+            throw new Error('invalid to & from for getEdit')
         }
+        return { from, to, type }
+    }
+
+    const getEditsFromPath = (path: Coordinates[]): Edit[] => {
+        const edits = []
+        for (let i = 1; i < path.length; i++) {
+            edits.push(getEdit(path[i], path[i - 1]))
+        }
+        return edits
     }
 
     useEffect(() => {
@@ -173,6 +182,7 @@ export const useLevenshtein = (props: { a: string, b: string }) => {
         getPrevSteps,
         getAllPaths,
         getSinglePath,
-        getEditFromPrevStep,
+        getEdit,
+        getEditsFromPath,
     }
 }

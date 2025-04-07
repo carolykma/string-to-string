@@ -2,7 +2,7 @@ import _ from "lodash"
 import { Flex } from "antd"
 import { InteractiveGrid } from "../../components/grid"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { Coordinates, useLevenshtein } from "./hooks/useLevenshtein"
+import { Coordinates, Edit, EditTypeEnum, useLevenshtein } from "./hooks/useLevenshtein"
 
 type LevenshteinMatrixProps = {
     a: string
@@ -13,7 +13,7 @@ type LevenshteinMatrixProps = {
 
 export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
     const { a, b, compute, showAllPaths } = props
-    const { matrix, hasNextLevel, computeNextLevel, getAllPaths, getSinglePath, getEditFromPrevStep } = useLevenshtein({ a, b })
+    const { matrix, hasNextLevel, computeNextLevel, getAllPaths, getSinglePath, getEditsFromPath } = useLevenshtein({ a, b })
 
     const [hovered, setHovered] = useState<Coordinates>()
 
@@ -31,13 +31,9 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
 
     // for displaying edits
     const edits = useMemo(() => {
-        if (!path || !getEditFromPrevStep) return
-        const edits = []
-        for (let i = 1; i < path.length; i++) {
-            edits.push(getEditFromPrevStep(path[i], path[i - 1]))
-        }
-        return edits
-    }, [path, getEditFromPrevStep])
+        if (!path || !getEditsFromPath) return
+        return getEditsFromPath(path)
+    }, [path, getEditsFromPath])
 
     useEffect(() => {
         if (compute && hasNextLevel) computeNextLevel()
@@ -90,19 +86,46 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
                 }
             </Flex>
             {
-                edits?.length &&
-                <div>
-                    <div>List of Edits:</div>
-                    {
-                        edits
-                            .filter(edit => edit.description !== 'no edit')
-                            .map((edit, idx) => {
-                                return <div>{idx + 1}. {edit.description}</div>
-                            })
-                    }
-                </div> || null
+                hovered && !!edits?.length &&
+                <ListOfEdits
+                    a={a.substring(0, hovered.x + 1)}
+                    b={b.substring(0, hovered.y + 1)}
+                    edits={edits}
+                />
             }
 
         </Flex>
     )
+}
+
+const ListOfEdits = (props: { a: string, b: string, edits: Edit[] }) => {
+    const { a, b, edits } = props
+
+    const getDescription = (edit: Edit) => {
+        const { x, y } = edit.to;
+        switch (edit.type) {
+            case EditTypeEnum.NULL:
+                return "no edit";
+            case EditTypeEnum.SUBSTITUTION:
+                return `${a[x]} → ${b[y]}`;
+            case EditTypeEnum.INSERTION:
+                return `+ ${b[y]}`;
+            case EditTypeEnum.DELETION:
+                return `- ${a[x]}`
+        }
+    }
+
+    return <div id='list-of-edits' className="w-50">
+        <div>{a} → {b}</div>
+        <div className="bg-white rounded-md p-2">
+            <div>List of Edits:</div>
+            {
+                edits
+                    .filter(edit => edit.type !== EditTypeEnum.NULL)
+                    .map((edit, idx) => {
+                        return <div>{idx + 1}. {getDescription(edit)}</div>
+                    })
+            }
+        </div>
+    </div>
 }
