@@ -34,44 +34,51 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
     }, [matrix, compute])
 
     return (
-        <Flex vertical gap={1}
-            className="bg-gray-200 w-fit rounded-md overflow-hidden"
-            onMouseLeave={() => setHovered(undefined)}
-        >
-            <Flex gap={1}>
-                <InteractiveGrid disabled={true} />
+        <div>
+            <Flex vertical gap={1}
+                className="bg-gray-200 w-fit rounded-md overflow-hidden"
+                onMouseLeave={() => setHovered(undefined)}
+            >
+                <Flex gap={1}>
+                    <InteractiveGrid bg="#d9d9d9" />
 
-                {/* strA characters */}
-                {a.split("").map((char, idx) =>
-                    <InteractiveGrid
-                        text={char}
-                        active={hovered && hovered.x >= idx}
-                        key={`a-${idx}`}
-                    />
-                )}
-            </Flex>
-            {
-                b.split("").map((char, idx) => {
-                    return <Flex gap={1} key={`b-row-${idx}`}>
-                        {/* strB characters */}
+                    {/* strA characters */}
+                    {a.split("").map((char, idx) =>
                         <InteractiveGrid
                             text={char}
-                            active={hovered && hovered.y >= idx}
-                            key={`b-${idx}`}
+                            isHovered={hovered && hovered.x >= idx}
+                            bg="#d9d9d9"
+                            bgHovered="#8c8c8c"
+                            key={`a-${idx}`}
                         />
-
-                        {/* computed values */}
-                        {matrix[idx]?.map((value, idx2) =>
+                    )}
+                </Flex>
+                {
+                    b.split("").map((char, idx) => {
+                        return <Flex gap={1} key={`b-row-${idx}`}>
+                            {/* strB characters */}
                             <InteractiveGrid
-                                text={value.toString()}
-                                setHovered={() => setHovered({ x: idx2, y: idx })}
-                                positive={showAllPaths ? isAllPaths({ x: idx2, y: idx }) : isPath({ x: idx2, y: idx })}
-                                key={`value-${idx2}-${idx}`}
+                                text={char}
+                                isHovered={hovered && hovered.y >= idx}
+                                bg="#d9d9d9"
+                                bgHovered="#8c8c8c"
+                                key={`b-${idx}`}
                             />
-                        )}
-                    </Flex>
-                })
-            }
-        </Flex>
+
+                            {/* computed values */}
+                            {matrix[idx]?.map((value, idx2) =>
+                                <InteractiveGrid
+                                    text={value.toString()}
+                                    setHovered={() => setHovered({ x: idx2, y: idx })}
+                                    isHovered={showAllPaths ? isAllPaths({ x: idx2, y: idx }) : isPath({ x: idx2, y: idx })}
+                                    bgHovered="#bae0ff"
+                                    key={`value-${idx2}-${idx}`}
+                                />
+                            )}
+                        </Flex>
+                    })
+                }
+            </Flex>
+        </div>
     )
 }
