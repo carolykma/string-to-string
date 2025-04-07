@@ -1,4 +1,4 @@
-import { Button, Flex, Input, Switch, Typography } from "antd"
+import { Button, Flex, Input, Typography } from "antd"
 import { LevenshteinMatrix } from "./LevenshteinMatrix"
 import { useEffect, useState } from "react"
 
@@ -6,8 +6,6 @@ export const LevenshteinPage = () => {
     const [strA, setStrA] = useState("SUNDAY")
     const [strB, setStrB] = useState("SATURDAY")
     const [compute, setCompute] = useState(false)
-    const [showAllPaths, setShowAllPaths] = useState(false)
-
 
     useEffect(() => {
         setCompute(false)
@@ -38,11 +36,7 @@ export const LevenshteinPage = () => {
             </div>
         </Flex>
 
-        <Flex align="center" gap={5} className="!pb-2">
-            <Switch checked={showAllPaths} onChange={(checked) => setShowAllPaths(checked)} />
-            <div className="mb-0.5">Show All Paths</div>
-        </Flex>
-        <LevenshteinMatrix a={strA} b={strB} compute={compute} showAllPaths={showAllPaths} />
+        <LevenshteinMatrix a={strA} b={strB} compute={compute} />
     </div>
 }
 
