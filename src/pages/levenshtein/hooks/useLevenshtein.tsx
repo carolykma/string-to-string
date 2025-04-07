@@ -1,10 +1,15 @@
-import _ from "lodash"
+import _, { get } from "lodash"
 import { useEffect, useMemo, useState } from "react"
 
 // types
 export type Coordinates = {
     x: number
     y: number
+}
+
+export type Edit = {
+    description: string,
+    from: 'top-left' | 'top' | 'left'
 }
 
 // algorithm
@@ -77,7 +82,7 @@ export const useLevenshtein = (props: { a: string, b: string }) => {
         return allPrev.filter(({ x, y }) => matrix[y][x] === min)
     }
 
-    const getAllPrevSteps = (coordinates: Coordinates): Coordinates[] => {
+    const getAllPaths = (coordinates: Coordinates): Coordinates[] => {
         if (!hasValue(coordinates)) return [];
 
         const set = new Set<string>() // key: "x-y" for deduplication
@@ -99,6 +104,41 @@ export const useLevenshtein = (props: { a: string, b: string }) => {
         })
     }
 
+    const getSinglePath = (coordinates: Coordinates): Coordinates[] => {
+        const path = [coordinates];
+        const getPrevStepRecursively = (coordinates: Coordinates) => {
+            const prev = getPrevSteps(coordinates)[0]
+            if (prev) {
+                path.unshift(prev)
+                getPrevStepRecursively(prev)
+            }
+        }
+        getPrevStepRecursively(coordinates)
+        return path;
+    }
+
+    const getEditFromPrevStep = (cur: Coordinates, prev: Coordinates): Edit => {
+        const { x, y } = cur
+        if (_.isEqual(prev, { x: x - 1, y: y - 1 })) {
+            return {
+                from: 'top-left',
+                description: a[x] === b[y] ? "no edit" : `replace ${a[x]} with ${b[y]}`,
+            }
+        } else if (_.isEqual(prev, { x, y: y - 1 })) {
+            return {
+                from: 'top',
+                description: `add ${b[y]}`,
+            }
+        } else if (_.isEqual(prev, { x: x - 1, y })) {
+            return {
+                from: 'left',
+                description: `remove ${a[x]}`
+            }
+        } else {
+            throw new Error('invalid coordinates for getEditFromPrevStep')
+        }
+    }
+
     useEffect(() => {
         setMatrix([])
     }, [a, b])
@@ -109,6 +149,8 @@ export const useLevenshtein = (props: { a: string, b: string }) => {
         hasNextLevel,
         computeNextLevel,
         getPrevSteps,
-        getAllPrevSteps,
+        getAllPaths,
+        getSinglePath,
+        getEditFromPrevStep,
     }
 }

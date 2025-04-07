@@ -8,21 +8,26 @@ type LevenshteinMatrixProps = {
     a: string
     b: string
     compute?: boolean
+    showAllPaths?: boolean
 }
 
 export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
-    const { a, b, compute } = props
-    const { matrix, hasNextLevel, computeNextLevel, getAllPrevSteps } = useLevenshtein({ a, b })
+    const { a, b, compute, showAllPaths } = props
+    const { matrix, hasNextLevel, computeNextLevel, getAllPaths, getSinglePath } = useLevenshtein({ a, b })
 
     const [hovered, setHovered] = useState<Coordinates>()
 
-    // for displaying min route
-    const prevSteps = useMemo(() => hovered ? getAllPrevSteps(hovered) : [], [hovered])
-    const isPrevStep = useCallback(
-        (coordinates: Coordinates) => prevSteps.some((prevStep) => _.isEqual(coordinates, prevStep)),
-        [prevSteps]
+    // for displaying min route(s)
+    const allPaths = useMemo(() => hovered ? getAllPaths(hovered) : [], [hovered])
+    const isAllPaths = useCallback(
+        (coordinates: Coordinates) => allPaths.some((step) => _.isEqual(coordinates, step)),
+        [getAllPaths]
     )
-
+    const path = useMemo(() => hovered ? getSinglePath(hovered) : [], [hovered])
+    const isPath = useCallback(
+        (coordinates: Coordinates) => path.some((step) => _.isEqual(coordinates, step)),
+        [path]
+    )
 
     useEffect(() => {
         if (compute && hasNextLevel) computeNextLevel()
@@ -60,7 +65,7 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
                             <InteractiveGrid
                                 text={value.toString()}
                                 setHovered={() => setHovered({ x: idx2, y: idx })}
-                                positive={isPrevStep({ x: idx2, y: idx })}
+                                positive={showAllPaths ? isAllPaths({ x: idx2, y: idx }) : isPath({ x: idx2, y: idx })}
                                 key={`value-${idx2}-${idx}`}
                             />
                         )}

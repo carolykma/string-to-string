@@ -1,4 +1,4 @@
-import { Button, Flex, Input, Typography } from "antd"
+import { Button, Flex, Input, Switch, Typography } from "antd"
 import { LevenshteinMatrix } from "./LevenshteinMatrix"
 import { useEffect, useState } from "react"
 
@@ -6,6 +6,8 @@ export const LevenshteinPage = () => {
     const [strA, setStrA] = useState("SUNDAY")
     const [strB, setStrB] = useState("SATURDAY")
     const [compute, setCompute] = useState(false)
+    const [showAllPaths, setShowAllPaths] = useState(false)
+
 
     useEffect(() => {
         setCompute(false)
@@ -18,26 +20,29 @@ export const LevenshteinPage = () => {
 
         [Explain Levenshtein Distance]<br /><br />
 
-        <Flex vertical gap={3}>
+        <Flex vertical gap={3} className="!mb-10">
             <Flex align="center" gap={5}>
-                <div>String 1:</div>
+                <div>From:</div>
                 <div >
                     <Input value={strA} onChange={(e) => setStrA(e.target.value.toUpperCase())} />
                 </div>
             </Flex>
             <Flex align="center" gap={5}>
-                <div>String 2:</div>
+                <div>To:</div>
                 <div>
                     <Input value={strB} onChange={(e) => setStrB(e.target.value.toUpperCase())} />
                 </div>
             </Flex>
-            <div className="mb-10">
+            <div>
                 <Button type="primary" onClick={() => setCompute(true)}>Compute</Button>
             </div>
         </Flex>
 
-
-        <LevenshteinMatrix a={strA} b={strB} compute={compute} />
+        <Flex align="center" gap={5} className="!pb-2">
+            <Switch checked={showAllPaths} onChange={(checked) => setShowAllPaths(checked)} />
+            <div className="mb-0.5">Show All Paths</div>
+        </Flex>
+        <LevenshteinMatrix a={strA} b={strB} compute={compute} showAllPaths={showAllPaths} />
     </div>
 }
 
