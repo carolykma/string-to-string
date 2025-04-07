@@ -1,4 +1,4 @@
-import _, { get } from "lodash"
+import _ from "lodash"
 import { useEffect, useMemo, useState } from "react"
 
 // types
@@ -70,16 +70,37 @@ export const useLevenshtein = (props: { a: string, b: string }) => {
         return matrix[y]?.[x] !== undefined
     }
 
+    const getValue = (coordinates: Coordinates): number => {
+        const { x, y } = coordinates
+        const value = matrix?.[y]?.[x]
+        if (value === undefined) throw new Error(`no value for grid ${x}-${y}`)
+        return value
+    }
+
+    const getPrevStepCandidates = (coordinates: Coordinates): Coordinates[] => {
+        const { x, y } = coordinates;
+        return [
+            { x: x - 1, y: y - 1 }, // top-left
+            { x: x - 1, y }, // left
+            { x, y: y - 1 }, // top
+        ].filter(hasValue)
+    }
+
     const getPrevSteps = (coordinates: Coordinates): Coordinates[] => {
         if (!hasValue(coordinates)) return [];
-        const { x, y } = coordinates;
-        const allPrev = [
-            { x: x - 1, y },
-            { x, y: y - 1 },
-            { x: x - 1, y: y - 1 },
-        ].filter(hasValue)
-        const min = _.min(allPrev.map(({ x, y }) => matrix[y][x]))
-        return allPrev.filter(({ x, y }) => matrix[y][x] === min)
+        const allCandidates = getPrevStepCandidates(coordinates)
+
+        const { x, y } = coordinates
+        const currentValue = getValue(coordinates)
+        return allCandidates.filter((candidate, idx) => {
+            const value = getValue(candidate)
+            if (idx === 0 && a[x] === b[y]) {
+                // top-left and last string equal
+                return value === currentValue
+            } else {
+                return value === currentValue - 1
+            }
+        })
     }
 
     const getAllPaths = (coordinates: Coordinates): Coordinates[] => {
@@ -98,6 +119,7 @@ export const useLevenshtein = (props: { a: string, b: string }) => {
         }
 
         getPrevStepsRecursively(coordinates)
+        set.add(`${coordinates.x}-${coordinates.y}`)
         return Array.from(set).map(key => {
             const [x, y] = key.split('-')
             return { x: parseInt(x), y: parseInt(y) }
@@ -122,17 +144,17 @@ export const useLevenshtein = (props: { a: string, b: string }) => {
         if (_.isEqual(prev, { x: x - 1, y: y - 1 })) {
             return {
                 from: 'top-left',
-                description: a[x] === b[y] ? "no edit" : `replace ${a[x]} with ${b[y]}`,
+                description: a[x] === b[y] ? "no edit" : `${a[x]} → ${b[y]}`,
             }
         } else if (_.isEqual(prev, { x, y: y - 1 })) {
             return {
                 from: 'top',
-                description: `add ${b[y]}`,
+                description: `+ ${b[y]}`,
             }
         } else if (_.isEqual(prev, { x: x - 1, y })) {
             return {
                 from: 'left',
-                description: `remove ${a[x]}`
+                description: `- ${a[x]}`
             }
         } else {
             throw new Error('invalid coordinates for getEditFromPrevStep')

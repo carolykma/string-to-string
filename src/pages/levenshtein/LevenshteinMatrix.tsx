@@ -13,7 +13,7 @@ type LevenshteinMatrixProps = {
 
 export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
     const { a, b, compute, showAllPaths } = props
-    const { matrix, hasNextLevel, computeNextLevel, getAllPaths, getSinglePath } = useLevenshtein({ a, b })
+    const { matrix, hasNextLevel, computeNextLevel, getAllPaths, getSinglePath, getEditFromPrevStep } = useLevenshtein({ a, b })
 
     const [hovered, setHovered] = useState<Coordinates>()
 
@@ -29,12 +29,22 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
         [path]
     )
 
+    // for displaying edits
+    const edits = useMemo(() => {
+        if (!path || !getEditFromPrevStep) return
+        const edits = []
+        for (let i = 1; i < path.length; i++) {
+            edits.push(getEditFromPrevStep(path[i], path[i - 1]))
+        }
+        return edits
+    }, [path, getEditFromPrevStep])
+
     useEffect(() => {
         if (compute && hasNextLevel) computeNextLevel()
     }, [matrix, compute])
 
     return (
-        <div>
+        <Flex id='levenshtein-matrix' gap={15}>
             <Flex vertical gap={1}
                 className="bg-gray-200 w-fit rounded-md overflow-hidden"
                 onMouseLeave={() => setHovered(undefined)}
@@ -79,6 +89,20 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
                     })
                 }
             </Flex>
-        </div>
+            {
+                edits?.length &&
+                <div>
+                    <div>List of Edits:</div>
+                    {
+                        edits
+                            .filter(edit => edit.description !== 'no edit')
+                            .map((edit, idx) => {
+                                return <div>{idx + 1}. {edit.description}</div>
+                            })
+                    }
+                </div> || null
+            }
+
+        </Flex>
     )
 }
