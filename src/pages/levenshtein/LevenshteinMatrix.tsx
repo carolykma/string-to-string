@@ -1,8 +1,8 @@
 import _ from "lodash"
 import { Flex } from "antd"
 import { InteractiveGrid } from "../../components/grid"
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react"
-import { Coordinates, Edit, EditTypeEnum, useLevenshtein } from "./hooks/useLevenshtein"
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { Levenshtein, Coordinates, Edit, EditTypeEnum } from "./algorithm/Levenshtein"
 
 type LevenshteinMatrixProps = {
     a: string
@@ -12,31 +12,42 @@ type LevenshteinMatrixProps = {
 
 export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
     const { a, b, compute } = props
-    const { matrix, hasNextLevel, computeNextLevel, getAllPaths, getSinglePath, getEditsFromPath } = useLevenshtein({ a, b })
-
+    const levenshtein = useRef<Levenshtein>(undefined)
+    const [matrix, setMatrix] = useState<number[][]>([])
     const [hovered, setHovered] = useState<Coordinates>()
 
     // for displaying min route(s)
-    const allPaths = useMemo(() => hovered ? getAllPaths(hovered) : [], [hovered])
-    const isAllPaths = useCallback(
-        (coordinates: Coordinates) => allPaths.some((step) => _.isEqual(coordinates, step)),
-        [getAllPaths]
+    const allPossibleSteps = useMemo(() => {
+        if (!hovered || !levenshtein.current) return []
+        return levenshtein.current.getAllPossibleStepsToTarget(hovered)
+    }, [hovered])
+    const samplePath = useMemo(() => {
+        if (!hovered || !levenshtein.current) return []
+        return levenshtein.current.getSinglePathToTarget(hovered)
+    }, [hovered])
+    const isPossibleStep = useCallback(
+        (coordinates: Coordinates) => allPossibleSteps.some((step) => _.isEqual(coordinates, step)),
+        [allPossibleSteps]
     )
-    const path = useMemo(() => hovered ? getSinglePath(hovered) : [], [hovered])
-    const isPath = useCallback(
-        (coordinates: Coordinates) => path.some((step) => _.isEqual(coordinates, step)),
-        [path]
+    const isSamplePath = useCallback(
+        (coordinates: Coordinates) => samplePath.some((step) => _.isEqual(coordinates, step)),
+        [samplePath]
     )
 
     // for displaying edits
     const edits = useMemo(() => {
-        if (!path || !getEditsFromPath) return
-        return getEditsFromPath(path)
-    }, [path, getEditsFromPath])
+        if (!samplePath || !levenshtein.current) return
+        return levenshtein.current.getListOfEditsFromPath(samplePath)
+    }, [samplePath])
 
     useEffect(() => {
-        if (compute && hasNextLevel) computeNextLevel()
-    }, [matrix, compute])
+        if (!a || !b || !compute) {
+            setMatrix([])
+            return
+        }
+        levenshtein.current = new Levenshtein(a, b)
+        setMatrix(levenshtein.current.getMatrixValues())
+    }, [a, b, compute])
 
     return (
         <Flex id='levenshtein-matrix' gap={15}>
@@ -75,8 +86,8 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
                                 <InteractiveGrid
                                     text={value.toString()}
                                     setHovered={() => setHovered({ x: idx2, y: idx })}
-                                    isHovered={isAllPaths({ x: idx2, y: idx })}
-                                    bgHovered={isPath({ x: idx2, y: idx }) ? "#69b1ff" : "#bae0ff"}
+                                    isHovered={isPossibleStep({ x: idx2, y: idx })}
+                                    bgHovered={isSamplePath({ x: idx2, y: idx }) ? "#69b1ff" : "#bae0ff"}
                                     key={`value-${idx2}-${idx}`}
                                 />
                             )}
@@ -101,39 +112,21 @@ const ListOfEdits = (props: { a: string, b: string, edits: Edit[] }) => {
     const { a, b, edits } = props
 
     const getVisualization = (edit: Edit): ReactNode => {
-        const { x, y } = edit.to;
-        const pre = b.substring(0, edit.from.y + 1)
+        const pre = b.substring(0, (edit.from ? edit.from.y : -1) + 1)
         const suf = a.substring(edit.to.x + 1)
 
-        let middle: ReactNode;
-        switch (edit.type) {
-            case EditTypeEnum.SUBSTITUTION:
-                middle = <span>
-                    (
-                    <s className="text-red-500">{a[x]}</s>
-                    <span className="text-yellow-500">+{b[y]}</span>
-                    )
-                </span>
-                break;
-            case EditTypeEnum.INSERTION:
-                middle = <span>
-                    (<span className="text-green-500">+{b[y]}</span>)
-                </span>
-                break;
-            case EditTypeEnum.DELETION:
-                middle = <span>
-                    (<s className="text-red-500">{a[x]}</s>)
-                </span>
-                break;
-            default:
-                break;
-        }
-
         return <span>
-            {pre}{middle}{suf} → {pre}
+            {pre}
+            (
+            {edit.deletion && <s className="text-red-500">{edit.deletion}</s>}
+            {edit.insertion &&
+                <span className={edit.type === EditTypeEnum.SUBSTITUTION ? "text-yellow-500" : "text-green-500"}>
+                    +{edit.insertion}</span>
+            }
+            )
+            {suf} → {pre}
             <span className={edit.type === EditTypeEnum.SUBSTITUTION ? "text-yellow-500" : "text-green-500"}>
-                {edit.type === EditTypeEnum.DELETION ? "" : b[y]}
-            </span>
+                {edit.insertion}</span>
             {suf}
         </span>
     }
