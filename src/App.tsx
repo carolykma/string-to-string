@@ -6,7 +6,7 @@ import { SideMenu } from "./components/nav";
 function App() {
   return (
     <>
-      <BrowserRouter>
+      <BrowserRouter basename="/string-to-string">
         <Layout style={{ minHeight: "100vh" }}>
           <Layout.Sider theme="light">
             <Typography.Title level={4} className="pl-4 pt-3">
