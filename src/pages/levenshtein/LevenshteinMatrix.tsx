@@ -52,7 +52,7 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
     return (
         <Flex id='levenshtein-matrix' gap={15}>
             <Flex vertical gap={1}
-                className="bg-gray-200 w-fit rounded-md overflow-hidden"
+                className="bg-gray-200 w-fit h-fit rounded-md overflow-hidden"
                 onMouseLeave={() => setHovered(undefined)}
             >
                 <Flex gap={1}>

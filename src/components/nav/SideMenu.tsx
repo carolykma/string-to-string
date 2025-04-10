@@ -7,7 +7,7 @@ export const SideMenu = () => {
     return <Menu
         id="side-menu"
         mode="inline"
-        defaultOpenKeys={['similarity']}
+        defaultOpenKeys={['editingDistance']}
         style={{ border: 'none' }}
         items={[
             {
@@ -18,8 +18,8 @@ export const SideMenu = () => {
                 }
             },
             {
-                key: 'similarity',
-                label: 'String Similarity',
+                key: 'editingDistance',
+                label: 'Editing Distance',
                 children: [
                     {
                         key: 'levenshtein',
