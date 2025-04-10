@@ -2,7 +2,7 @@ import _ from "lodash"
 import { Flex } from "antd"
 import { InteractiveGrid } from "../../components/grid"
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Levenshtein, Coordinates, Edit, EditTypeEnum } from "./algorithm/Levenshtein"
+import { Levenshtein, Coordinates, Edit, EditTypeEnum } from "./algorithm/levenshtein"
 
 type LevenshteinMatrixProps = {
     a: string

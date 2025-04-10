@@ -1,4 +1,4 @@
-import { Levenshtein } from "../levenshtein/algorithm/Levenshtein"
+import { Levenshtein } from "../levenshtein/algorithm/levenshtein"
 
 new Levenshtein(
     "SUNDAY",
