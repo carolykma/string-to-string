@@ -1,5 +1,5 @@
 import { Flex, Input, Typography } from "antd"
-import { LevenshteinMatrix } from "./LevenshteinMatrix"
+import { LevenshteinMatrix } from "../../components/levenshtein"
 import { useState } from "react"
 
 export const LevenshteinPage = () => {
