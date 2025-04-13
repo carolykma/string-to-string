@@ -1,9 +1,10 @@
 import _ from "lodash"
 import { Flex } from "antd"
 import { InteractiveGrid } from "../grid"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Levenshtein, Coordinates } from "../../algorithms/levenshtein"
 import { LevenshteinEdits } from "."
+import { useLevenshteinHover } from "./useLevenshteinHover"
 
 type LevenshteinMatrixProps = {
     a: string
@@ -18,28 +19,7 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
     const [hovered, setHovered] = useState<Coordinates>()
 
     // for displaying min route(s)
-    const allPossibleSteps = useMemo(() => {
-        if (!hovered || !levenshtein.current) return []
-        return levenshtein.current.getAllPossibleStepsToTarget(hovered)
-    }, [hovered])
-    const samplePath = useMemo(() => {
-        if (!hovered || !levenshtein.current) return []
-        return levenshtein.current.getSinglePathToTarget(hovered)
-    }, [hovered])
-    const isPossibleStep = useCallback(
-        (coordinates: Coordinates) => allPossibleSteps.some((step) => _.isEqual(coordinates, step)),
-        [allPossibleSteps]
-    )
-    const isSamplePath = useCallback(
-        (coordinates: Coordinates) => samplePath.some((step) => _.isEqual(coordinates, step)),
-        [samplePath]
-    )
-
-    // for displaying edits
-    const edits = useMemo(() => {
-        if (!samplePath || !levenshtein.current) return
-        return levenshtein.current.getListOfEditsFromPath(samplePath)
-    }, [samplePath])
+    const { isSamplePath, isPossibleStep, samplePathEdits } = useLevenshteinHover(levenshtein, hovered)
 
     useEffect(() => {
         if (!a || !b || !compute) {
@@ -97,11 +77,11 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
                 }
             </Flex>
             {
-                hovered && !!edits?.length &&
+                hovered && !!samplePathEdits?.length &&
                 <LevenshteinEdits
                     a={a.substring(0, hovered.x + 1)}
                     b={b.substring(0, hovered.y + 1)}
-                    edits={edits}
+                    edits={samplePathEdits}
                 />
             }
 
