@@ -1,25 +1,26 @@
 import { ReactNode } from "react"
-import { Edit, EditTypeEnum } from "../../algorithms/levenshtein"
+import { EditTypeEnum, LevenshteinEdit } from "../../algorithms/levenshtein"
 
-export const LevenshteinEdits = (props: { a: string, b: string, edits: Edit[] }) => {
+export const LevenshteinEdits = (props: { a: string, b: string, edits: LevenshteinEdit[] }) => {
     const { a, b, edits } = props
 
-    const getVisualization = (edit: Edit): ReactNode => {
-        const pre = b.substring(0, (edit.from ? edit.from.y : -1) + 1)
-        const suf = a.substring(edit.to.x + 1)
+    const getVisualization = (edit: LevenshteinEdit): ReactNode => {
+        const { from, to, type, deletion, insertion } = edit;
+        const pre = from && b.substring(0, (from.y) + 1)
+        const suf = a.substring(to.x + 1)
 
         return <span>
             {pre}
             (
-            {edit.deletion && <s className="text-red-500">{edit.deletion}</s>}
-            {edit.insertion &&
-                <span className={edit.type === EditTypeEnum.SUBSTITUTION ? "text-yellow-500" : "text-green-500"}>
-                    +{edit.insertion}</span>
+            {deletion && <s className="text-red-500">{deletion}</s>}
+            {insertion &&
+                <span className={type === EditTypeEnum.SUBSTITUTION ? "text-yellow-500" : "text-green-500"}>
+                    +{insertion}</span>
             }
             )
             {suf} → {pre}
-            <span className={edit.type === EditTypeEnum.SUBSTITUTION ? "text-yellow-500" : "text-green-500"}>
-                {edit.insertion}</span>
+            <span className={type === EditTypeEnum.SUBSTITUTION ? "text-yellow-500" : "text-green-500"}>
+                {insertion}</span>
             {suf}
         </span>
     }
