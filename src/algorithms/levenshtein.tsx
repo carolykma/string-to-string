@@ -133,13 +133,16 @@ export class Levenshtein {
     private readonly matrix: LevenshteinStep[][] = [];
 
     constructor(public a: string, public b: string) {
-        for (let y = 0; y < b.length; y++) {
+        const _a = `_${a}`
+        const _b = `_${b}`
+
+        for (let y = 0; y < _b.length; y++) {
             this.matrix[y] = [];
-            for (let x = 0; x < a.length; x++) {
+            for (let x = 0; x < _a.length; x++) {
                 this.matrix[y].push(new LevenshteinStep(
                     x, y,
-                    a.slice(0, x + 1),
-                    b.slice(0, y + 1),
+                    _a.slice(0, x + 1),
+                    _b.slice(0, y + 1),
                     this.getStep({ x, y: y - 1 }),
                     this.getStep({ x: x - 1, y }),
                     this.getStep({ x: x - 1, y: y - 1 }),

@@ -6,8 +6,8 @@ export const LevenshteinEdits = (props: { a: string, b: string, edits: Levenshte
 
     const getVisualization = (edit: LevenshteinEdit): ReactNode => {
         const { from, to, type, deletion, insertion } = edit;
-        const pre = from && b.substring(0, (from.y) + 1)
-        const suf = a.substring(to.x + 1)
+        const pre = from && b.substring(0, from.y)
+        const suf = a.substring(to.x)
 
         return <span>
             {pre}
@@ -22,14 +22,14 @@ export const LevenshteinEdits = (props: { a: string, b: string, edits: Levenshte
             <span className={type === EditTypeEnum.SUBSTITUTION ? "text-yellow-500" : "text-green-500"}>
                 {insertion}</span>
             {suf}
+            {(!pre && !suf && !insertion) && '[null]'}
         </span>
     }
 
     return <div id='list-of-edits' className="w-70">
-        <div>{a} → {b}</div>
         <div className="bg-white rounded-md p-2">
+            <div className="font-bold underline">{a || '[null]'} → {b || '[null]'}</div>
             <div>List of Edits:</div>
-            <div>From: {a}</div>
             {
                 edits
                     .filter(edit => edit.type !== EditTypeEnum.NULL)

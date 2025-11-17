@@ -40,7 +40,7 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
                     <InteractiveGrid bg="#d9d9d9" />
 
                     {/* strA characters */}
-                    {a.split("").map((char, idx) =>
+                    {`•${a}`.split("").map((char, idx) =>
                         <InteractiveGrid
                             text={char}
                             isHovered={hovered && hovered.x >= idx}
@@ -51,7 +51,7 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
                     )}
                 </Flex>
                 {
-                    b.split("").map((char, idx) => {
+                    `•${b}`.split("").map((char, idx) => {
                         return <Flex gap={1} key={`b-row-${idx}`}>
                             {/* strB characters */}
                             <InteractiveGrid
@@ -79,8 +79,8 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
             {
                 hovered && !!samplePathEdits?.length &&
                 <LevenshteinEdits
-                    a={a.substring(0, hovered.x + 1)}
-                    b={b.substring(0, hovered.y + 1)}
+                    a={a.substring(0, hovered.x)}
+                    b={b.substring(0, hovered.y)}
                     edits={samplePathEdits}
                 />
             }
