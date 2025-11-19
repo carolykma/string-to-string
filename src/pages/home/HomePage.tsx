@@ -30,7 +30,7 @@ export const HomePage = () => {
             📢Updates:
         </Typography.Title>
         <div>Levenshtein Distance <Tag color="blue">Try it out!</Tag></div>
-        <div>Damerau-Levenshtein Distance <Tag color="green">WIP</Tag></div>
+        <div>Damerau-Levenshtein Distance <Tag color="blue">Try it out!</Tag></div>
 
 
         <Flex className="!mt-15">

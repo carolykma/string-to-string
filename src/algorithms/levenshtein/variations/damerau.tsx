@@ -25,10 +25,6 @@ export class DamerauLevenshteinEdit extends LevenshteinEdit {
             return super.getEditType()
         }
     }
-
-    public get distance(): number {
-        return this.type === EditTypeEnum.NULL ? 0 : 1
-    }
 }
 
 export class DamerauLevenshteinStep extends LevenshteinStep {
@@ -40,24 +36,28 @@ export class DamerauLevenshteinStep extends LevenshteinStep {
         public top?: DamerauLevenshteinStep,
         public left?: DamerauLevenshteinStep,
         public diagonal?: DamerauLevenshteinStep, // (top left)
-        public diagonalTwo?: DamerauLevenshteinStep, // (top top left left)
+        public diagonalTwo?: DamerauLevenshteinStep // (top top left left)
     ) {
         super(x, y, strA, strB, top, left, diagonal)
+    }
+
+    protected getEdit(from?: DamerauLevenshteinStep): DamerauLevenshteinEdit {
+        return new DamerauLevenshteinEdit(from || null, this)
     }
 
     public get parents(): DamerauLevenshteinStep[] {
         const parents: DamerauLevenshteinStep[] =
             super.parents.filter(p => p instanceof DamerauLevenshteinStep);
         if (this.diagonalTwo && this.canTranspose && !this.isLastCharEqual) {
-            parents.push(this.diagonalTwo)
+            parents.unshift(this.diagonalTwo)
         }
         return parents
     }
 
-    public get canTranspose() {
-        return this.diagonalTwo &&
-            secondLastChar(this.strA) === lastChar(this.strB) &&
-            lastChar(this.strA) === secondLastChar(this.strB)
+    public get canTranspose(): boolean {
+        return !!(this.diagonalTwo &&
+            (secondLastChar(this.strA) === lastChar(this.strB)) &&
+            (lastChar(this.strA) === secondLastChar(this.strB)))
     }
 
     protected calcDistanceThroughParent = (step: LevenshteinStep): number => {

@@ -2,16 +2,16 @@ import { Flex, Input, Typography } from "antd"
 import { LevenshteinMatrix } from "../../components/levenshtein"
 import { useState } from "react"
 
-export const LevenshteinPage = () => {
+export const DamerauLevenshteinPage = () => {
     const [strA, setStrA] = useState("WORM")
     const [strB, setStrB] = useState("FROM")
 
     return <div id='levenshtein-page'>
         <Typography.Title level={3}>
-            Levenshtein Distance
+            Damerau-Levenshtein Distance
         </Typography.Title>
 
-        [Explain Levenshtein Distance]<br /><br />
+        [Explain Damerau-Levenshtein Distance]<br /><br />
 
         <Flex vertical gap={3} className="!mb-6">
             <Flex align="center" justify="between" gap={5}>
@@ -28,7 +28,7 @@ export const LevenshteinPage = () => {
             </Flex>
         </Flex>
 
-        <LevenshteinMatrix a={strA} b={strB} compute={true} />
+        <LevenshteinMatrix a={strA} b={strB} compute={true} variation="damerau" />
     </div>
 }
 

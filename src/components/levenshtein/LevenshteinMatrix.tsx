@@ -10,10 +10,11 @@ type LevenshteinMatrixProps = {
     a: string
     b: string
     compute?: boolean
+    variation?: 'base' | 'damerau'
 }
 
 export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
-    const { a, b, compute } = props
+    const { a, b, compute, variation = 'base' } = props
     const levenshtein = useRef<Levenshtein>(undefined)
     const [matrix, setMatrix] = useState<number[][]>([])
     const [hovered, setHovered] = useState<Coordinates>()
@@ -26,7 +27,7 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
             setMatrix([])
             return
         }
-        levenshtein.current = new Levenshtein(a, b)
+        levenshtein.current = new Levenshtein(a, b, variation)
         setMatrix(levenshtein.current.getMatrixValues())
     }, [a, b, compute])
 

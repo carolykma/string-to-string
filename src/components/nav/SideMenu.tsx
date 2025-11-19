@@ -27,6 +27,13 @@ export const SideMenu = () => {
                         onClick: () => {
                             navigate('/levenshtein')
                         }
+                    },
+                    {
+                        key: 'damerau-levenshtein',
+                        label: 'Damerau-Levenshtein',
+                        onClick: () => {
+                            navigate('/damerau-levenshtein')
+                        }
                     }
                 ]
             }

@@ -45,8 +45,8 @@ export class LevenshteinEdit {
 }
 
 export class LevenshteinStep {
-    public distance: number;
-    protected optimalParents: LevenshteinStep[]
+    public distance: number = 0;
+    protected optimalParents: LevenshteinStep[] = [];
 
     constructor(
         public x: number,
@@ -56,7 +56,9 @@ export class LevenshteinStep {
         public top?: LevenshteinStep,
         public left?: LevenshteinStep,
         public diagonal?: LevenshteinStep,
-    ) {
+    ) { }
+
+    public init(): void {
         this.distance = this.calcOptimalDistance()
         this.optimalParents = this.parents.filter(p => this.calcDistanceThroughParent(p) === this.distance);
     }
@@ -71,8 +73,12 @@ export class LevenshteinStep {
         return [this.diagonal, this.left, this.top].filter(step => !!step)
     }
 
+    protected getEdit(from?: LevenshteinStep): LevenshteinEdit {
+        return new LevenshteinEdit(from || null, this)
+    }
+
     protected calcDistanceThroughParent = (step: LevenshteinStep): number => {
-        const edit = new LevenshteinEdit(step, this)
+        const edit = this.getEdit(step)
         return step.distance + edit.distance
     }
 
@@ -85,7 +91,7 @@ export class LevenshteinStep {
         if (!step && !this.isOrigin) {
             throw new Error('[getEditFromParent] missing ancestor step')
         }
-        return new LevenshteinEdit(step || null, this)
+        return this.getEdit(step)
     }
 
     public getSinglePath = (): LevenshteinStep[] => {
