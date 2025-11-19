@@ -1,5 +1,6 @@
-import { lastChar, secondLastChar } from "../../utils/utils";
-import { EditTypeEnum, LevenshteinEdit, LevenshteinStep } from "../levenshtein";
+import { lastChar, secondLastChar } from "../../../utils/utils";
+import { LevenshteinEdit, LevenshteinStep } from "./base";
+import { EditTypeEnum } from "../types";
 
 export class DamerauLevenshteinEdit extends LevenshteinEdit {
     public transposition?: string[];

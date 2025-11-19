@@ -1,5 +1,5 @@
 import { ReactNode } from "react"
-import { EditTypeEnum, LevenshteinEdit } from "../../algorithms/levenshtein"
+import { EditTypeEnum, LevenshteinEdit } from "../../algorithms/levenshtein";
 
 export const LevenshteinEdits = (props: { a: string, b: string, edits: LevenshteinEdit[] }) => {
     const { a, b, edits } = props
