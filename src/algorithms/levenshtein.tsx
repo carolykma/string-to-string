@@ -10,15 +10,8 @@ export enum EditTypeEnum {
     INSERTION = 'insertion',
     DELETION = 'deletion',
     SUBSTITUTION = 'substitution',
+    TRANSPOSITION = 'transposition',
     NULL = 'null'
-}
-
-export type Edit = {
-    from?: Coordinates,
-    to: Coordinates,
-    type: EditTypeEnum
-    deletion?: string;
-    insertion?: string;
 }
 
 export class LevenshteinEdit {
@@ -30,26 +23,29 @@ export class LevenshteinEdit {
         public readonly from: LevenshteinStep | null,
         public readonly to: LevenshteinStep,
     ) {
-        const { strA, strB } = to
-        switch (from) {
+        this.type = this.getEditType();
+
+        const { strA, strB } = this.to
+        if (this.type === EditTypeEnum.SUBSTITUTION) {
+            this.deletion = lastChar(strA)
+            this.insertion = lastChar(strB)
+        } else if (this.type === EditTypeEnum.DELETION) {
+            this.deletion = lastChar(strA)
+        } else if (this.type === EditTypeEnum.INSERTION) {
+            this.insertion = lastChar(strB)
+        }
+
+    }
+
+    protected getEditType(): EditTypeEnum {
+        switch (this.from) {
             case null: // origin
-            case to.diagonal:
-                if (to.isLastCharEqual) {
-                    this.type = EditTypeEnum.NULL
-                } else {
-                    this.type = EditTypeEnum.SUBSTITUTION
-                    this.deletion = lastChar(strA)
-                    this.insertion = lastChar(strB)
-                }
-                break;
-            case to.top:
-                this.type = EditTypeEnum.INSERTION
-                this.insertion = lastChar(strB)
-                break;
-            case to.left:
-                this.type = EditTypeEnum.DELETION
-                this.deletion = lastChar(strA)
-                break;
+            case this.to.diagonal:
+                return this.to.isLastCharEqual ? EditTypeEnum.NULL : EditTypeEnum.SUBSTITUTION;
+            case this.to.top:
+                return EditTypeEnum.INSERTION
+            case this.to.left:
+                return EditTypeEnum.DELETION
             default:
                 throw new Error('[LevenshteinEdit] invalid steps provided')
         }
@@ -62,7 +58,7 @@ export class LevenshteinEdit {
 
 export class LevenshteinStep {
     public distance: number;
-    private optimalParents: LevenshteinStep[]
+    protected optimalParents: LevenshteinStep[]
 
     constructor(
         public x: number,
@@ -83,16 +79,16 @@ export class LevenshteinStep {
         return lastChar(this.strA) === lastChar(this.strB)
     }
 
-    private get parents(): LevenshteinStep[] {
+    public get parents(): LevenshteinStep[] {
         return [this.diagonal, this.left, this.top].filter(step => !!step)
     }
 
-    private calcDistanceThroughParent = (step: LevenshteinStep): number => {
+    protected calcDistanceThroughParent = (step: LevenshteinStep): number => {
         const edit = new LevenshteinEdit(step, this)
         return step.distance + edit.distance
     }
 
-    private calcOptimalDistance = (): number => {
+    protected calcOptimalDistance = (): number => {
         if (this.isOrigin) return this.isLastCharEqual ? 0 : 1;
         return _.min(this.parents.map(c => this.calcDistanceThroughParent(c))) || 0;
     }
