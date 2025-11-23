@@ -18,6 +18,7 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
     const levenshtein = useRef<Levenshtein>(undefined)
     const [matrix, setMatrix] = useState<number[][]>([])
     const [hovered, setHovered] = useState<Coordinates>()
+    const [locked, setLocked] = useState<boolean>(false)
 
     // for displaying min route(s)
     const { isSamplePath, isPossibleStep, samplePathEdits } = useLevenshteinHover(levenshtein, hovered)
@@ -29,13 +30,14 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
         }
         levenshtein.current = new Levenshtein(a, b, variation)
         setMatrix(levenshtein.current.getMatrixValues())
+        setHovered({ x: a.length, y: b.length })
     }, [a, b, compute])
 
     return (
-        <Flex id='levenshtein-matrix' gap={15}>
+        <Flex id='levenshtein-matrix' gap={20} wrap="wrap">
             <Flex vertical gap={1}
-                className="bg-gray-200 w-fit h-fit rounded-md overflow-hidden"
-                onMouseLeave={() => setHovered(undefined)}
+                className="bg-gray-200 w-fit h-fit rounded-md  !shrink-0 relative"
+                onMouseLeave={() => !locked && setHovered(undefined)}
             >
                 <Flex gap={1}>
                     <InteractiveGrid bg="#d9d9d9" />
@@ -67,6 +69,8 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
                             {matrix[idx]?.map((value, idx2) =>
                                 <InteractiveGrid
                                     text={value.toString()}
+                                    locked={locked}
+                                    setLocked={setLocked}
                                     setHovered={() => setHovered({ x: idx2, y: idx })}
                                     isHovered={isPossibleStep({ x: idx2, y: idx })}
                                     bgHovered={isSamplePath({ x: idx2, y: idx }) ? "#69b1ff" : "#bae0ff"}
@@ -76,6 +80,11 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
                         </Flex>
                     })
                 }
+                <img
+                    src="icon/click.svg"
+                    className="absolute -bottom-3 -right-3 opacity-25 
+                        cursor-pointer hover:scale-[1.2] transition duration-500"
+                />
             </Flex>
             {
                 hovered && !!samplePathEdits?.length &&
@@ -83,6 +92,8 @@ export const LevenshteinMatrix = (props: LevenshteinMatrixProps) => {
                     a={a.substring(0, hovered.x)}
                     b={b.substring(0, hovered.y)}
                     edits={samplePathEdits}
+                    isLocked={locked}
+                    setLocked={setLocked}
                 />
             }
 

@@ -7,10 +7,12 @@ type InteractiveGridProps = {
     bgHovered?: string
     isHovered?: boolean
     setHovered?: () => void
+    locked?: boolean
+    setLocked?: (value: boolean) => void
 }
 
 export const InteractiveGrid = (props: InteractiveGridProps) => {
-    const { text, size, bg = 'white', bgHovered = 'blue', isHovered, setHovered } = props
+    const { text, size, bg = 'white', bgHovered = 'blue', isHovered, setHovered, locked, setLocked } = props
 
     return (
         <Flex align="center" justify="center"
@@ -20,7 +22,9 @@ export const InteractiveGrid = (props: InteractiveGridProps) => {
                 backgroundColor: isHovered ? bgHovered : bg,
                 cursor: 'pointer'
             }}
-            onMouseEnter={setHovered}
+            onMouseEnter={() => !locked && setHovered?.()}
+            onClick={() => locked ? setHovered?.() : setLocked?.(true)}
+            className="select-none"
         >
             {text || " "}
         </Flex >

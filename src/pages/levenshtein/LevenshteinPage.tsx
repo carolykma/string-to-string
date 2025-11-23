@@ -13,19 +13,17 @@ export const LevenshteinPage = () => {
 
         [Explain Levenshtein Distance]<br /><br />
 
-        <Flex vertical gap={3} className="!mb-6">
-            <Flex align="center" justify="between" gap={5}>
-                <div className="w-10">From:</div>
-                <div>
-                    <Input value={strA} onChange={(e) => setStrA(e.target.value.toUpperCase())} />
-                </div>
-            </Flex>
-            <Flex align="center" justify="between" gap={5}>
-                <div className="w-10">To:</div>
-                <div>
-                    <Input value={strB} onChange={(e) => setStrB(e.target.value.toUpperCase())} />
-                </div>
-            </Flex>
+        <Flex vertical gap={3} className="!mb-6 !w-[250px]">
+            <Input
+                addonBefore={<div className="w-[40px] text-left">From:</div>}
+                value={strA}
+                onChange={(e) => setStrA(e.target.value.toUpperCase())}
+            />
+            <Input
+                addonBefore={<div className="w-[40px] text-left">To:</div>}
+                value={strB}
+                onChange={(e) => setStrB(e.target.value.toUpperCase())}
+            />
         </Flex>
 
         <LevenshteinMatrix a={strA} b={strB} compute={true} />
